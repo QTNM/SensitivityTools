@@ -52,7 +52,7 @@ namespace TBeta
   //
 
   // heaviside function
-  double heavyside(double x){
+  inline double heavyside(double x){
     double result;
     if (x>0.0) result = 1.0;
     else if (x==0.0) result = 0.5;
@@ -61,7 +61,7 @@ namespace TBeta
   }
   
   // Lanczos approximation - needs testing!
-  std::complex<double> Gamma(std::complex<double> z) {
+  inline std::complex<double> Gamma(std::complex<double> z) {
     double g = 7;
     static const double p[9] = {0.99999999999980993, 676.5203681218851, -1259.1392167224028,
 				771.32342877765313, -176.61502916214059, 12.507343278686905,
@@ -116,31 +116,31 @@ namespace TBeta
   // [2] PRL 5(85) 807
 
     // Atomic 3He mass including n-th energy level binding
-    double MfAt(int n){
-        if (n<1) n=1; // remove illegal n values
-        return Mf + me - 4.0*Ryd/(n*n);
-    }
-
-    // 3-body endpoint energy of atomic tritium [keV] (neutrino mass [keV])
-    // and energy level n
-    double endAt(double munu, int n){
-        double mat2  = MAt*MAt;
-        double me2   = me*me;
-        double matn  = MfAt(n);
-        double msum2 = (matn+munu)*(matn+munu);
-        return (mat2 + me2 - msum2)/(2.0*MAt) - me;
-    }
-
-    // Simpson approximation of Fermi function [1] (A.2)
-    double Fermi(int Z, double beta) {
-        double eta   = alpha * Z / beta; // Sommerfeld parameter
-        double nom   = twopi * eta * (1.002037 - 0.001427*beta);
-        double denom = 1.0-std::exp(-twopi * eta);
-        return nom / denom;
-    }
-
+  inline double MfAt(int n){
+    if (n<1) n=1; // remove illegal n values
+    return Mf + me - 4.0*Ryd/(n*n);
+  }
+  
+  // 3-body endpoint energy of atomic tritium [keV] (neutrino mass [keV])
+  // and energy level n
+  inline double endAt(double munu, int n){
+    double mat2  = MAt*MAt;
+    double me2   = me*me;
+    double matn  = MfAt(n);
+    double msum2 = (matn+munu)*(matn+munu);
+    return (mat2 + me2 - msum2)/(2.0*MAt) - me;
+  }
+  
+  // Simpson approximation of Fermi function [1] (A.2)
+  inline double Fermi(int Z, double beta) {
+    double eta   = alpha * Z / beta; // Sommerfeld parameter
+    double nom   = twopi * eta * (1.002037 - 0.001427*beta);
+    double denom = 1.0-std::exp(-twopi * eta);
+    return nom / denom;
+  }
+  
   // Radiative correction [1] (A.3)
-  double G(double en, double endp) {
+  inline double G(double en, double endp) {
     if (endp<=en || en<emin) return 0.0;
     double w  = (en + me) / me; // total electron energy [me]
     double w0 = (endp + me) / me;
@@ -155,7 +155,7 @@ namespace TBeta
   }
 
   // Orbital electron shielding [1] (A.4)
-  double S(int Z, double en) {
+  inline double S(int Z, double en) {
     if (en<emin) return 1.0; // check announced anomaly
     double w  = (en + me) / me; // total electron energy [me]
     double p  = std::sqrt(w*w - 1.0);
@@ -174,7 +174,7 @@ namespace TBeta
   }
   
   // Scaling od the electric field within nucleus [1] (A.7)
-  double L(int Z, double en) {
+  inline double L(int Z, double en) {
     double w  = (en + me) / me; // total electron energy [me]
     double fac = alpha * Z;
     double gamma = std::sqrt(1.0-fac*fac);
@@ -184,7 +184,7 @@ namespace TBeta
   }
   
   // Convolution of electron and neutrino wavefunctions within nucleus [1] (A.8)
-  double CC(int Z, double en, double endp) {
+  inline double CC(int Z, double en, double endp) {
     if (endp<=en || en<emin) return 1.0;
     double w  = (en + me) / me; // total electron energy [me]
     double w0 = (endp + me) / me;
@@ -197,7 +197,7 @@ namespace TBeta
   
 
     // Recoiling nuclear charge field [1] (A.9)
-  double Q(int Z, double en, double endp) {
+  inline double Q(int Z, double en, double endp) {
     if (endp<=en || en<emin) return 1.0;
     double lt = gA / gV;
     double w   = (en + me) / me; // total electron energy [me]
@@ -210,7 +210,7 @@ namespace TBeta
   // Combined correction factor for atomic tritium
   // function of neutrino mass munu [keV], n atomic energy level
   // of daughter nucleus, en electron energy [kev]
-  double Corr(double en, double munu, int n) {
+  inline double Corr(double en, double munu, int n) {
     double e0 = endAt(munu, n);
     if (e0<=en || en<emin) return 1.0; // no correction
     double arg = std::sqrt((en+me)*(en+me)-me*me)/(en+me);
@@ -220,7 +220,7 @@ namespace TBeta
   // Differential decay rate with energy en [kev], applicable to LH SM currents
   // for the emission of an electron antineutrino with mass munu [kev] and 
   // the endpoint of the n-th 3He energy level. With corrections.
-  double stub(double en, double munu, double e0) { // used twice, factor out
+  inline double stub(double en, double munu, double e0) { // used twice, factor out
     if (e0<en || en<emin) return 0.0;
     double fac1  = (Gf*Gf*Vud*Vud)/(2.0*pi*pi*pi);
     double denom = MTr*MTr - 2.0*MTr*(en+me) + me*me;
@@ -241,16 +241,16 @@ namespace TBeta
     return fac1*(term1+term2+term3);
   }
 
-    double Diff(double en, double munu, int n) {
-        double e0 = endAt(munu, n);
-        double fac = stub(en, munu, e0);
-        return fac * Corr(en,munu,n);
-    }
-
+  inline double Diff(double en, double munu, int n) {
+    double e0 = endAt(munu, n);
+    double fac = stub(en, munu, e0);
+    return fac * Corr(en,munu,n);
+  }
+  
   // neutrino mass spectrum
   // order is boolean True for Normal order (NO)
   // False for Inverted order (IO)
-  const std::array<double,3>& nuSpectrum(bool order, double munu) {
+  inline const std::array<double,3>& nuSpectrum(bool order, double munu) {
     static const std::array<double,3> no = {munu, std::sqrt(munu*munu+dm21Sq), std::sqrt(munu*munu+dm31Sq)};
     static const std::array<double,3> io = {std::sqrt(munu*munu-dm21Sq-dm32Sq), std::sqrt(munu*munu-dm32Sq), munu};
     return order ? no : io;
@@ -259,7 +259,7 @@ namespace TBeta
   // like Diff but summing over all three light neutrinos with weights.
   // order is boolean True for Normal order (NO)
   // False for Inverted order (IO)
-  double Diff3nu(bool order, double en, double munu, int n) {
+  inline double Diff3nu(bool order, double en, double munu, int n) {
     const std::array<double,3>& UeSq = order ? UeSqNO : UeSqIO;
     double  sum  = 0.0;
     for (int i=0;i<3;++i) {
@@ -268,92 +268,92 @@ namespace TBeta
     return sum;
   }
   
-    // like Diff but summing over all three light neutrinos with weights and
-    // a sterile neutrino with mass mN [keV] with active-sterile mixing
-    // strength eta (0<=eta<1)
-    double Diff4nu(bool order, double mN, double eta, double en, double munu, int n) {
-        double e0 = endAt(mN, n);
-        return (1.0-eta*eta)*Diff3nu(order, en, munu, n) + eta*eta*Diff(en, mN, n)*heavyside(e0-en);
-    }
-
-    // Sum over discrete atomic energy levels of 3He
-    // with branching ratios, [2]
-    double etaL(double en) {
-        double denom  = (en+me)*(en+me) - me*me;
-        return -2.0*alpha*me/std::sqrt(denom);
-    }
-
-    double aL(double en) {
-        double eta = etaL(en);
-        double nom = std::exp(2.0*eta*std::atan(-2.0/eta));
-        double denom = (1.0 + eta*eta/4.0)*(1.0 + eta*eta/4.0);
-        return eta*eta*eta*eta*nom/denom;
-    }
-
-    double Lev(int n, double en) {
-        double al = aL(en);
-        if (n==2) // special case
-            return 0.25 * (1.0 + al*al - al);
-        double term1 = 256.0*std::pow(n, 5)*std::pow(n-2, 2*n-4)/std::pow(n+2, 2*n+4);
-        double term2 = al*al/(n*n*n) - 16.0*n*al*std::pow(n-2, n-2)/std::pow(n+2, n+2);
-        return 2.0*(term1+term2);
-    }
-
-    // Full (SM+sterile) differential decay rate as function of electron energy [keV].
-    // Includes all corrections (no continuum orbital e- states) and 
-    // the first 5 bound discrete atomic states.
-    double dGammadE(bool order, double munu, double mN, double eta, double en) {
-        double sum = 0.0;
-        for (int n=1;n<=5;++n)
-            sum += Lev(n, en) * Diff4nu(order, mN, eta, en, munu, n);
-        return sum;
-    }
-
-    // Set up all contributions including continous states and first 5 
-    // discrete states. Here consider state n as double for continuum states.
-    double endCont(double munu, double n) {
-        return endAt(munu, 1)-4.0*Ryd*(1.0+1.0/(n*n));
-    }
-
-    double CorrCont(double en, double munu, double n) {
-        double e0 = endCont(munu, n);
-        double nom  = (en+me)*(en+me) - me*me;
-        double fac = Fermi(2,std::sqrt(nom)/(en+me))*S(2,en)*G(en,e0);
-        return fac*L(2,en)*CC(2,en,e0)*Q(2,en,e0);
-    }
-
-    double DiffCont(double en, double munu, double n) {
-        double e0 = endCont(munu, n);
-        double fac = stub(en, munu, e0);
-        return fac * CorrCont(en, munu, n);
-    }
-
-    // integrand over states g
-    double integrand(double g, double en, double munu) {
-        double fac1 = DiffCont(en, munu, g)*twopi/(g*g*g*(std::exp(twopi*g)-1.0));
-        double fac2 = g*g*g*g*std::exp(2.0*g*std::atan(-2.0/g))/((1.0+g*g/4.0)*(1.0+g*g/4.0));
-        return fac1*(fac2*fac2 + aL(en)*aL(en) - aL(en)*fac2);
-    }
-
-    // Contribution only from the continuum orbital electron states.
-    // integrate over g.
-    double gammaCont(double en, double munu) {
-        if (en > endCont(munu, 1e10) || en<emin) return 0.0;
-        std::function<double(double,double,double)> fn = integrand;
-        SimpsonIntegral sint(fn, en, munu);
-        return sint.integrate(-99, etaL(en), 1000)/pi;
-    }
-
-  double dGammadECont(bool order, double munu, double mN, double eta, double en) {
+  // like Diff but summing over all three light neutrinos with weights and
+  // a sterile neutrino with mass mN [keV] with active-sterile mixing
+  // strength eta (0<=eta<1)
+  inline double Diff4nu(bool order, double mN, double eta, double en, double munu, int n) {
+    double e0 = endAt(mN, n);
+    return (1.0-eta*eta)*Diff3nu(order, en, munu, n) + eta*eta*Diff(en, mN, n)*heavyside(e0-en);
+  }
+  
+  // Sum over discrete atomic energy levels of 3He
+  // with branching ratios, [2]
+  inline double etaL(double en) {
+    double denom  = (en+me)*(en+me) - me*me;
+    return -2.0*alpha*me/std::sqrt(denom);
+  }
+  
+  inline double aL(double en) {
+    double eta = etaL(en);
+    double nom = std::exp(2.0*eta*std::atan(-2.0/eta));
+    double denom = (1.0 + eta*eta/4.0)*(1.0 + eta*eta/4.0);
+    return eta*eta*eta*eta*nom/denom;
+  }
+  
+  inline double Lev(int n, double en) {
+    double al = aL(en);
+    if (n==2) // special case
+      return 0.25 * (1.0 + al*al - al);
+    double term1 = 256.0*std::pow(n, 5)*std::pow(n-2, 2*n-4)/std::pow(n+2, 2*n+4);
+    double term2 = al*al/(n*n*n) - 16.0*n*al*std::pow(n-2, n-2)/std::pow(n+2, n+2);
+    return 2.0*(term1+term2);
+  }
+  
+  // Full (SM+sterile) differential decay rate as function of electron energy [keV].
+  // Includes all corrections (no continuum orbital e- states) and 
+  // the first 5 bound discrete atomic states.
+  inline double dGammadE(bool order, double munu, double mN, double eta, double en) {
+    double sum = 0.0;
+    for (int n=1;n<=5;++n)
+      sum += Lev(n, en) * Diff4nu(order, mN, eta, en, munu, n);
+    return sum;
+  }
+  
+  // Set up all contributions including continous states and first 5 
+  // discrete states. Here consider state n as double for continuum states.
+  inline double endCont(double munu, double n) {
+    return endAt(munu, 1)-4.0*Ryd*(1.0+1.0/(n*n));
+  }
+  
+  inline double CorrCont(double en, double munu, double n) {
+    double e0 = endCont(munu, n);
+    double nom  = (en+me)*(en+me) - me*me;
+    double fac = Fermi(2,std::sqrt(nom)/(en+me))*S(2,en)*G(en,e0);
+    return fac*L(2,en)*CC(2,en,e0)*Q(2,en,e0);
+  }
+  
+  inline double DiffCont(double en, double munu, double n) {
+    double e0 = endCont(munu, n);
+    double fac = stub(en, munu, e0);
+    return fac * CorrCont(en, munu, n);
+  }
+  
+  // integrand over states g
+  inline double integrand(double g, double en, double munu) {
+    double fac1 = DiffCont(en, munu, g)*twopi/(g*g*g*(std::exp(twopi*g)-1.0));
+    double fac2 = g*g*g*g*std::exp(2.0*g*std::atan(-2.0/g))/((1.0+g*g/4.0)*(1.0+g*g/4.0));
+    return fac1*(fac2*fac2 + aL(en)*aL(en) - aL(en)*fac2);
+  }
+  
+  // Contribution only from the continuum orbital electron states.
+  // integrate over g.
+  inline double gammaCont(double en, double munu) {
+    if (en > endCont(munu, 1e10) || en<emin) return 0.0;
+    std::function<double(double,double,double)> fn = integrand;
+    SimpsonIntegral sint(fn, en, munu);
+    return sint.integrate(-99, etaL(en), 1000)/pi;
+  }
+  
+  inline double dGammadECont(bool order, double munu, double mN, double eta, double en) {
     const std::array<double,3>& UeSq = order ? UeSqNO : UeSqIO;
     double sum = 0.0;
     for (int i=0;i<3;++i) {
       sum += UeSq[i] * gammaCont(en, nuSpectrum(order,munu)[i]);
-        }
+    }
     return (1-eta*eta)*sum + eta*eta*gammaCont(en, mN);
   }
-
-  double dGammadEFull(bool order, double munu, double mN, double eta, double en) {
+  
+  inline double dGammadEFull(bool order, double munu, double mN, double eta, double en) {
     return dGammadE(order, munu, mN, eta, en) + dGammadECont(order, munu, mN, eta, en);
   }
 } // namespace TBeta
