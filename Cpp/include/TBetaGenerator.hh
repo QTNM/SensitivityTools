@@ -250,9 +250,9 @@ namespace TBeta
   // neutrino mass spectrum
   // order is boolean True for Normal order (NO)
   // False for Inverted order (IO)
-  inline const std::array<double,3>& nuSpectrum(bool order, double munu) {
-    static const std::array<double,3> no = {munu, std::sqrt(munu*munu+dm21Sq), std::sqrt(munu*munu+dm31Sq)};
-    static const std::array<double,3> io = {std::sqrt(munu*munu-dm21Sq-dm32Sq), std::sqrt(munu*munu-dm32Sq), munu};
+  inline const std::array<double,3> nuSpectrum(bool order, double munu) {
+    const std::array<double,3> no = {munu, std::sqrt(munu*munu+dm21Sq), std::sqrt(munu*munu+dm31Sq)};
+    const std::array<double,3> io = {std::sqrt(munu*munu-dm21Sq-dm32Sq), std::sqrt(munu*munu-dm32Sq), munu};
     return order ? no : io;
   }
 

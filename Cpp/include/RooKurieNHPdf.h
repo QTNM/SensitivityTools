@@ -14,31 +14,38 @@
 #include <RooAbsCategory.h>
 
 #include <complex>
+#include <iostream>
 #include "TBetaTools.hh"
 
 class RooKurieNHPdf : public RooAbsPdf {
 public:
   RooKurieNHPdf() {}
-  RooKurieNHPdf(const char *name, const char *title,        RooAbsReal& _en,
-		  RooAbsReal& _munu);
+  inline RooKurieNHPdf(const char *name, const char *title,
+		       RooAbsReal& _en, RooAbsReal& _munu)
+    : RooKurieNHPdf{name, title, RooAbsReal::Ref{_en}, RooAbsReal::Ref{_munu}} {}
+
+  RooKurieNHPdf(const char *name, const char *title,        RooAbsReal::Ref _en,
+		RooAbsReal::Ref _munu);
   RooKurieNHPdf(RooKurieNHPdf const &other, const char *name=nullptr);
   TObject* clone(const char *newname) const override { return new RooKurieNHPdf(*this, newname); }
+
 protected:
 
   RooRealProxy en ;
   RooRealProxy munu ;
 
   double evaluate() const override;
-  void computeBatch(double* output, std::size_t size, RooFit::Detail::DataMap const&) const override;
+  void doEval(RooFit::EvalContext &) const override;
   void translate(RooFit::Detail::CodeSquashContext &ctx) const override;
 
 private:
 
-  ClassDefOverride(RooKurieNHPdf, 1) // Your description goes here...
+  ClassDefOverride(RooKurieNHPdf, 1)
 };
-inline double RooKurieNHPdf_evaluate(double en, double munu) 
+
+inline double RooKurieNHPdf_evaluate(double x, double mn) 
 {
-  return TBTools::KurieTrsf(en, TBeta::dGammadE(true, munu, 0.0, 0.0, en));
+  return TBTools::KurieTrsf(x, TBeta::dGammadE(true, mn, 0.0, 0.0, x));
 }
 
 

@@ -40,16 +40,18 @@ double RooBDInverseHPdf::evaluate() const
    return RooBDInverseHPdf_evaluate(en, munu); 
 }
 
-void RooBDInverseHPdf::computeBatch(double *output, std::size_t size, RooFit::Detail::DataMap const &dataMap) const 
+void RooBDInverseHPdf::doEval(RooFit::EvalContext &ctx) const 
 { 
-   std::span<const double> enSpan = dataMap.at(en);
-   std::span<const double> munuSpan = dataMap.at(munu);
+   std::span<const double> enSpan = ctx.at(en);
+   std::span<const double> munuSpan = ctx.at(munu);
 
-   for (std::size_t i = 0; i < size; ++i) {
-      output[i] = RooBDInverseHPdf_evaluate(enSpan.size() > 1 ? enSpan[i] : enSpan[0],
-                               munuSpan.size() > 1 ? munuSpan[i] : munuSpan[0]);
+   std::size_t n = ctx.output().size();
+   for (std::size_t i = 0; i < n; ++i) {
+      ctx.output()[i] = RooBDInverseHPdf_evaluate(enSpan.size() > 1 ? enSpan[i] : enSpan[0],
+						  munuSpan.size() > 1 ? munuSpan[i] : munuSpan[0]);
    }
 } 
+
 void RooBDInverseHPdf::translate(RooFit::Detail::CodeSquashContext &ctx) const
 {
    ctx.addResult(this, ctx.buildCall("RooBDInverseHPdf_evaluate", en, munu));

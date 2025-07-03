@@ -19,8 +19,8 @@
 ClassImp(RooKurieNHPdf);
 
 RooKurieNHPdf::RooKurieNHPdf(const char *name, const char *title,
-				 RooAbsReal& _en,
-				 RooAbsReal& _munu)
+			     RooAbsReal::Ref _en,
+			     RooAbsReal::Ref _munu)
    : RooAbsPdf(name,title),
    en("en","en",this,_en),
    munu("munu","munu",this,_munu)
@@ -40,16 +40,18 @@ double RooKurieNHPdf::evaluate() const
    return RooKurieNHPdf_evaluate(en, munu); 
 }
 
-void RooKurieNHPdf::computeBatch(double *output, std::size_t size, RooFit::Detail::DataMap const &dataMap) const 
+void RooKurieNHPdf::doEval(RooFit::EvalContext &ctx) const 
 { 
-   std::span<const double> enSpan = dataMap.at(en);
-   std::span<const double> munuSpan = dataMap.at(munu);
+   std::span<const double> enSpan = ctx.at(en);
+   std::span<const double> munuSpan = ctx.at(munu);
 
-   for (std::size_t i = 0; i < size; ++i) {
-      output[i] = RooKurieNHPdf_evaluate(enSpan.size() > 1 ? enSpan[i] : enSpan[0],
-                               munuSpan.size() > 1 ? munuSpan[i] : munuSpan[0]);
+   std::size_t n = ctx.output().size();
+   for (std::size_t i = 0; i < n; ++i) {
+      ctx.output()[i] = RooKurieNHPdf_evaluate(enSpan.size() > 1 ? enSpan[i] : enSpan[0],
+					       munuSpan.size() > 1 ? munuSpan[i] : munuSpan[0]);
    }
 } 
+
 void RooKurieNHPdf::translate(RooFit::Detail::CodeSquashContext &ctx) const
 {
    ctx.addResult(this, ctx.buildCall("RooKurieNHPdf_evaluate", en, munu));
