@@ -29,7 +29,7 @@ protected:
   RooRealProxy munu ;
 
   double evaluate() const override;
-  void computeBatch(double* output, std::size_t size, RooFit::Detail::DataMap const&) const override;
+  void doEval(RooFit::EvalContext &) const override;
   void translate(RooFit::Detail::CodeSquashContext &ctx) const override;
 
 private:

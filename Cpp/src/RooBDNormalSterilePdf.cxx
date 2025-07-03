@@ -46,20 +46,22 @@ double RooBDNormalSterilePdf::evaluate() const
   return RooBDNormalSterilePdf_evaluate(en, munu, mN, eta); 
 }
 
-void RooBDNormalSterilePdf::computeBatch(double *output, std::size_t size, RooFit::Detail::DataMap const &dataMap) const 
+void RooBDNormalSterilePdf::doEval(RooFit::EvalContext &ctx) const 
 { 
-   std::span<const double> enSpan = dataMap.at(en);
-   std::span<const double> munuSpan = dataMap.at(munu);
-   std::span<const double> mNSpan = dataMap.at(mN);
-   std::span<const double> etaSpan = dataMap.at(eta);
+   std::span<const double> enSpan = ctx.at(en);
+   std::span<const double> munuSpan = ctx.at(munu);
+   std::span<const double> mNSpan = ctx.at(mN);
+   std::span<const double> etaSpan = ctx.at(eta);
 
-   for (std::size_t i = 0; i < size; ++i) {
-      output[i] = RooBDNormalSterilePdf_evaluate(enSpan.size() > 1 ? enSpan[i] : enSpan[0],
-						 munuSpan.size() > 1 ? munuSpan[i] : munuSpan[0],
-						 mNSpan.size() > 1 ? mNSpan[i] : mNSpan[0],
-						 etaSpan.size() > 1 ? etaSpan[i] : etaSpan[0]);
+   std::size_t n = ctx.output().size();
+   for (std::size_t i = 0; i < n; ++i) {
+     ctx.output()[i] = RooBDNormalSterilePdf_evaluate(enSpan.size() > 1 ? enSpan[i] : enSpan[0],
+						      munuSpan.size() > 1 ? munuSpan[i] : munuSpan[0],
+						      mNSpan.size() > 1 ? mNSpan[i] : mNSpan[0],
+						      etaSpan.size() > 1 ? etaSpan[i] : etaSpan[0]);
    }
 } 
+
 void RooBDNormalSterilePdf::translate(RooFit::Detail::CodeSquashContext &ctx) const
 {
   ctx.addResult(this, ctx.buildCall("RooBDNormalSterilePdf_evaluate", en, munu, mN, eta));

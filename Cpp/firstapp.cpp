@@ -28,20 +28,21 @@ int main(int argc, char** argv)
   
   double mnu    = 0.0; // null hypothesis
   double ubound = TBeta::endAt(mnu, 1);
-  double lbound = ubound - 0.01; // [keV]
+  double lbound = ubound - 0.001; // [keV]
   std::cout << "upper limit: " << std::setprecision(8) << ubound << std::endl;
 
   // make PDF
   RooRealVar en("en", "Energy [keV]", lbound, ubound);
   RooRealVar munu("munu","neutrino mass", mnu, 0.0, 1.e-3); // do not allow for negative mnu when fitting
   RooKurieNHPdf spec("kurie", "Kurie function", en, munu);
-
+  
   // plot PDF
   RooPlot* eframe = en.frame(Title("Kurie Plot"));
   spec.plotOn(eframe);
   
   // second plot
-  std::unique_ptr<RooDataSet> data{spec.generate(en, 10000)};
+  munu.setVal(2.0e-4);
+  std::unique_ptr<RooDataSet> data{spec.generate(en, 1000)};
   RooPlot* eframe2 = en.frame(Title("Kurie Plot with data"));
   data->plotOn(eframe2);
   spec.plotOn(eframe2);
