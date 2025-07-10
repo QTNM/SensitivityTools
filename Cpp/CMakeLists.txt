@@ -13,7 +13,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 list(APPEND CMAKE_CXX_FLAGS "-pthread -std=c++20 ${CMAKE_CXX_FLAGS}")
 
 #Require ROOT, initially try finding previously installed root
-find_package(ROOT REQUIRED COMPONENTS RooFit RooFitCore Minuit)
+find_package(ROOT REQUIRED COMPONENTS RooFit RooFitCore RooStats Minuit)
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS}")
 
@@ -39,4 +39,8 @@ target_link_libraries(rfit ${ROOT_LIBRARIES})
 #Executables
 add_executable(firstapp.exe firstapp.cpp)
 target_link_libraries(firstapp.exe 
+  rfit ${ROOT_LIBRARIES})
+
+add_executable(model.exe modeltrial.cpp)
+target_link_libraries(model.exe 
   rfit ${ROOT_LIBRARIES})
