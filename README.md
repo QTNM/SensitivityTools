@@ -27,3 +27,5 @@ have been adapted to newer versions here hence the 6.34 setup. Just create a 'bu
 ```
 cd build; cmake ..; make
 ```
+
+Application examples have been moved into the examples folder.

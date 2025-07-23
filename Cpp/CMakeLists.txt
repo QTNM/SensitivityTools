@@ -37,10 +37,14 @@ add_library(rfit SHARED
 target_link_libraries(rfit ${ROOT_LIBRARIES})
 
 #Executables
-add_executable(firstapp.exe firstapp.cpp)
+add_executable(firstapp.exe examples/firstapp.cpp)
 target_link_libraries(firstapp.exe 
   rfit ${ROOT_LIBRARIES})
 
-add_executable(model.exe modeltrial.cpp)
+add_executable(model.exe examples/modeltrial.cpp)
 target_link_libraries(model.exe 
+  rfit ${ROOT_LIBRARIES})
+
+add_executable(mcbatch.exe examples/mcbatch.cpp)
+target_link_libraries(mcbatch.exe 
   rfit ${ROOT_LIBRARIES})
