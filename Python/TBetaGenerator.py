@@ -38,8 +38,8 @@ dm31Sq =  2.517e-9
 dm32Sq = -2.498e-9
 
 # formula constants
-emin = 0.2  # [keV] low energy cut-off, avoiding atomic effects in S(Z,en)
 v0 = 76.0e-3 # =76 eV in ref [1]
+emin = v0  # [keV] low energy cut-off, avoiding atomic effects in S(Z,en)
 mcc = Mf / me  # mass of He3 in units of me [1]
 
 #
@@ -115,7 +115,7 @@ def S(Z: int, enin: np.ndarray) -> np.ndarray:
     w  = (en + me) / me  # total electron energy [me]
     p  = np.sqrt(w*w - 1.0)
     wb = w - v0 / me
-    pb = np.sqrt(wb*wb - 1.0)
+    pb = np.sqrt(wb*wb - 1.0) # issue for en<v0
     eta   = alpha * Z*w/p
     etab  = alpha * Z*wb/pb
     gam   = np.sqrt(1.0 - (alpha*alpha*Z*Z))
@@ -324,7 +324,7 @@ def gammaCont(enin: np.ndarray, munu: float) -> np.ndarray:
     # Can't be vectorized due to integral upper limit etaL(en)
     coll = []
     for e in en:  # work-around array input
-        coll.append(quad(integrand, -99, etaL(np.array([e]), args=(np.array([e]), munu))[0]/pi))
+        coll.append(quad(integrand, -99, etaL(np.array([e])), args=(np.array([e]), munu))[0]/pi)
     res[msk] = np.array(coll)  # same shape
     return res
 
